@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        p {
+            color: #777;
+        }
+
+        .add-button {
+            display: inline-block;
+            padding: 15px;
+            font-size: 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo App</h1>
+    
+    {% if user.is_authenticated %}
+        <p>Hello {{ user.username }},</p>
+    {% else %}
+        <p>Hello Guest,</p>
+    {% endif %}
+
+    <p>Today is {{ current_date }}</p>
+
+    <a href="{% url 'todolist' %}" class="add-button">+</a>
+</body>
+</html>

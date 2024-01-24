@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .task-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .task-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #343a40;
+        }
+
+        .task-description {
+            color: #6c757d;
+        }
+
+        .task-time {
+            color: #007bff;
+        }
+
+        .expired-task {
+            color: #dc3545;
+        }
+
+        .task-actions {
+            margin-top: 10px;
+        }
+
+        .btn-action {
+            margin-right: 10px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+        }
+
+        .add-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+
+    {% for task in tasks %}
+        <div class="task-container">
+            <div class="task-title">{{ task.title }}</div>
+            <div class="task-description">{{ task.description }}</div>
+            <div class="task-time">Finish Time: {{ task.finish_time }}</div>
+
+            {% if task.time_left.days >= 0 %}
+                <div class="task-time">Time Left: {{ task.time_left }}</div>
+            {% else %}
+                <div class="expired-task">Task Expired</div>
+            {% endif %}
+
+            <div class="task-actions">
+                <a href="{% url 'edittask' task.id %}" class="btn btn-secondary">Edit</a>
+                <a href="{% url 'deletetask' task.id %}" class="btn btn-danger">Delete</a>
+                <br>   
+                <!-- Add the following line for the complete_task view -->
+                <input type="checkbox" id="completeTask{{ task.id }}" onchange="completeTask('{{ task.id }}')" class="form-check-input">
+                <label for="completeTask{{ task.id }}" class="btn btn-info">Complete</label>
+            </div>
+        </div>
+    {% endfor %}
+
+    <a href="{% url 'addtask' %}" class="btn btn-success add-button">Add Task</a>
+
+    <!-- Bootstrap JS and Popper.js scripts (optional, but required for some Bootstrap features) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Add a script to handle the AJAX request for completing a task -->
+    <script>
+        function completeTask(taskId) {
+            // Send an AJAX request to the complete_task view
+            fetch("{% url 'complete_task' 0 %}".replace('0', taskId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                body: JSON.stringify({}),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Log or handle the response as needed
+                console.log(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+
+    <!-- Add a script to handle the AJAX request for completing a task -->
+<script>
+    function completeTask(taskId) {
+        // Display a loading indicator
+        const taskTitleElement = document.getElementById(`taskTitle${taskId}`);
+        taskTitleElement.style.opacity = 0.5; // Adjust the opacity as needed
+
+        // Send an AJAX request to the complete_task view
+        fetch("{% url 'complete_task' 0 %}".replace('0', taskId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({}),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Log or handle the response as needed
+            console.log(data);
+
+            // Update the style of the task title based on the completion status
+            if (data.completed) {
+                taskTitleElement.style.textDecoration = 'line-through';
+            } else {
+                taskTitleElement.style.textDecoration = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        })
+        .finally(() => {
+            // Hide the loading indicator when the AJAX request is complete
+            taskTitleElement.style.opacity = 1;
+        });
+    }
+</script>
+
+</body>
+</html>
