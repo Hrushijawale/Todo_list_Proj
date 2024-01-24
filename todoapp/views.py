@@ -23,8 +23,14 @@ from .models import *
 # User = settings.AUTH_USER_MODEL
 from django.contrib.auth import get_user_model
 User = get_user_model()
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
+
+# from django.contrib.auth.models import User
+from django.shortcuts import render, redirect
 from .models import UserProfile
+from django.conf import settings
+User = settings.AUTH_USER_MODEL
+
 
 
 def index(request):
@@ -60,6 +66,7 @@ def login(request):
 
     return render(request, 'todoapp/login.html')  
 
+
 def signup(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -67,28 +74,25 @@ def signup(request):
         password = request.POST.get('password')
         phone_number = request.POST.get('phone_number')
         age = request.POST.get('age')
-        email_host_user = request.POST.get('email_host_user')  # Add this line
-        email_host_password = request.POST.get('email_host_password')  # Add this line
 
         # Create a new user
         user = User.objects.create_user(username=email, email=email, password=password)
 
         # Create a user profile with the additional fields
         user_profile = UserProfile.objects.create(
+            user=user,
             name=name,
             email=email,
-            password=password, 
+            password=password,
             phone_number=phone_number,
             age=age,
-            user=user,
-            email_host_user=email_host_user,
-            email_host_password=email_host_password
         )
 
         messages.success(request, 'Account created successfully. You can now log in.')
         return redirect('login') 
 
-    return render(request, 'todoapp/signup.html')  
+    return render(request, 'todoapp/signup.html')
+
 
 # @login_required
 class TodoListView(View):
@@ -184,34 +188,3 @@ def complete_task(request, task_id):
 
     # If you prefer to use HttpResponse
     return HttpResponse(content_type='application/json', content=response_data)
-
-# class NotificationView(View):
-
-#     def get(self, request, task_id):
-#         task = TodoTask.objects.get(id=task_id)
-
-#         # Calculate 5 minutes before the finish time
-#         notification_time = task.finish_time - timedelta(minutes=5)
-
-#         # Check if it's time to send the notification
-#         if timezone.now() >= notification_time and not task.is_expired():
-#             # Get the user's email credentials from the UserProfile
-#             user_profile = UserProfile.objects.get(user=task.user)
-#             user_email = user_profile.email_host_user
-#             user_password = user_profile.email_host_password
-
-#             # Send email notification
-#             subject = f'Todo App Notification: 5 minutes left for "{task.title}"'
-#             message = f'Hi {task.user.username},\n\nJust a reminder that you have a task "{task.title}" due in 5 minutes.'
-#             from_email = user_email
-#             recipient_list = [user_email]
-
-#             send_mail(subject, message, from_email, recipient_list, auth_user=user_email, auth_password=user_password)
-
-#             # Update task to prevent multiple notifications
-#             task.last_notified = timezone.now()
-#             task.save()
-
-#             messages.info(request, f'Email notification sent for "{task.title}".')
-
-#         return redirect('todolist')
