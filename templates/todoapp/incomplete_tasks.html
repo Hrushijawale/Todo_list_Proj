@@ -1,0 +1,20 @@
+<!-- incomplete_tasks.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incomplete Tasks</title>
+</head>
+<body>
+    <h1>Incomplete Tasks</h1>
+    <p>You have {{ incomplete_tasks_count }} incomplete tasks.</p>
+
+    <ul>
+        {% for task in incomplete_tasks %}
+            <li>{{ task.title }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

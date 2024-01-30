@@ -27,19 +27,13 @@ User = settings.AUTH_USER_MODEL
 from django.contrib.auth import logout
 from .models import UserProfile
 from .models import TodoTask
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def index(request):
     return HttpResponse("This is from index")
 
-from django.shortcuts import render
-from .models import Task 
 
-from django.shortcuts import render, redirect
-from .models import Task
-
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def home_view(request):
     # Fetch all tasks from the database
@@ -81,13 +75,15 @@ def home_view(request):
             # Redirect back to the home page
             return redirect('home')
 
+    # Calculate the number of incomplete tasks
+    incomplete_tasks_count = TodoTask.objects.filter(completed=False).count()
+
     context = {
         'tasks': tasks,
+        'incomplete_tasks_count': incomplete_tasks_count,
     }
 
     return render(request, 'todoapp/home.html', context)
-
-
 
 def todo_list(request):
     return render(request, 'todoapp/todolist.html')
