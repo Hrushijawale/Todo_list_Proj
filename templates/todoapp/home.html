@@ -20,6 +20,7 @@
         .task-title {
             display: inline-block;
             margin-right: 10px;
+            cursor: pointer; /* Add cursor pointer for indicating clickability */
         }
 
         .complete-button, .delete-button {
@@ -46,9 +47,9 @@
         <!-- Task List -->
         {% for task in tasks %}
         <div class="task-container">
-            <div class="task-title{% if task.completed %} completed{% endif %}">
+            <a href="{% url 'todolist' %}" class="task-title{% if task.completed %} completed{% endif %}">
                 {{ task.title }}
-            </div>
+            </a>
             <form action="{% url 'home' %}" method="post" style="display: inline;">
                 {% csrf_token %}
                 <input type="hidden" name="task_id" value="{{ task.id }}">
@@ -63,6 +64,21 @@
             </form>
         </div>
         {% endfor %}
+
+        <!-- Pagination Links -->
+        <div class="mt-4">
+            {% if tasks.has_previous %}
+            <a href="?page=1" class="btn btn-secondary">&laquo; First</a>
+            <a href="?page={{ tasks.previous_page_number }}" class="btn btn-secondary">&lsaquo; Previous</a>
+            {% endif %}
+
+            <span class="btn btn-light">Page {{ tasks.number }} of {{ tasks.paginator.num_pages }}</span>
+
+            {% if tasks.has_next %}
+            <a href="?page={{ tasks.next_page_number }}" class="btn btn-secondary">Next &rsaquo;</a>
+            <a href="?page={{ tasks.paginator.num_pages }}" class="btn btn-secondary">Last &raquo;</a>
+            {% endif %}
+        </div>
 
         <!-- Add Task Button -->
         <a href="{% url 'addtask' %}" class="btn btn-primary mt-4">Add Task</a>

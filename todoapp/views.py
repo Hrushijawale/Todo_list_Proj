@@ -39,7 +39,28 @@ from .models import Task
 from django.shortcuts import render, redirect
 from .models import Task
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 def home_view(request):
+    # Fetch all tasks from the database
+    tasks_list = TodoTask.objects.all()
+
+    # Number of tasks per page
+    tasks_per_page = 6
+
+    paginator = Paginator(tasks_list, tasks_per_page)
+
+    page_number = request.GET.get('page')
+
+    try:
+        tasks = paginator.page(page_number)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        tasks = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range, deliver last page of results.
+        tasks = paginator.page(paginator.num_pages)
+
     if request.method == 'POST':
         task_id = request.POST.get('task_id')
         action = request.POST.get('action')
@@ -60,14 +81,12 @@ def home_view(request):
             # Redirect back to the home page
             return redirect('home')
 
-    # Fetch all tasks from the database
-    tasks = TodoTask.objects.all()
-
     context = {
         'tasks': tasks,
     }
 
     return render(request, 'todoapp/home.html', context)
+
 
 
 def todo_list(request):
@@ -257,3 +276,5 @@ def incomplete_tasks_view(request):
         'incomplete_tasks': incomplete_tasks,
         'incomplete_tasks_count': incomplete_tasks_count
     })
+
+
