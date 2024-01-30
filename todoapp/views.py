@@ -24,6 +24,9 @@ from django.shortcuts import render, redirect
 from .models import UserProfile
 from django.conf import settings
 User = settings.AUTH_USER_MODEL
+from django.contrib.auth import logout
+from .models import UserProfile
+from .models import TodoTask
 
 
 
@@ -61,30 +64,37 @@ def login(request):
 
 def signup(request):
     if request.method == 'POST':
-        name = request.POST.get('name')
-        email = request.POST.get('email')
-        password = request.POST.get('password')
-        phone_number = request.POST.get('phone_number')
-        age = request.POST.get('age')
+        name = request.POST['name']
+        email = request.POST['email']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+        phone_number = request.POST['phone_number']
+        age = request.POST['age']
 
-       
-        user = User.objects.create_user(username=email, email=email, password=password)
+        
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match")
+            return redirect('register')
 
-      
-        user_profile = UserProfile.objects.create(
-            user=user,
+        
+        new_user_profile = UserProfile(
             name=name,
             email=email,
             password=password,
             phone_number=phone_number,
-            age=age,
+            age=age
         )
+        new_user_profile.save()
 
-        messages.success(request, 'Account created successfully. You can now log in.')
-        return redirect('login') 
+        return redirect('login')  
+    else:
+        return render(request, 'todoapp/signup.html')
 
-    return render(request, 'todoapp/signup.html')
 
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')  # Redirect to the home page after logout
 
 
 class TodoListView(View):
@@ -93,6 +103,13 @@ class TodoListView(View):
     def get(self, request):
         tasks = TodoTask.objects.all()
         return render(request, self.template_name, {'tasks': tasks})
+    
+
+def todo_list(request):
+    tasks = TodoTask.objects.all()
+    incomplete_tasks_count = TodoTask.objects.filter(completed=False).count()
+    return render(request, 'todo_list.html', {'tasks': tasks, 'incomplete_tasks_count': incomplete_tasks_count})
+
 
 class AddTaskView(View):
     template_name = 'todoapp/addtask.html'
@@ -152,15 +169,69 @@ class DeleteTaskView(View):
         return redirect('todolist')
     
    
-from django.shortcuts import render, get_object_or_404
+# from django.shortcuts import render, get_object_or_404
+# from django.http import JsonResponse
+# from django.http import HttpResponse
+# from .models import TodoTask
+
+# def complete_task(request, task_id):
+   
+#     task = get_object_or_404(TodoTask, pk=task_id)
+#     task.completed = not task.completed
+#     task.save()
+#     response_data = {'status': 'success', 'title': task.title, 'completed': task.completed} 
+#     return HttpResponse(content_type='application/json', content=response_data)
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.http import HttpResponse
 from .models import TodoTask
 
+# def complete_task(request, task_id):
+#     task = get_object_or_404(TodoTask, pk=task_id)
+#     task.completed = not task.completed
+#     task.save()
+
+#     # Calculate the number of incomplete tasks
+#     incomplete_tasks_count = TodoTask.objects.filter(completed=False).count()
+
+#     # Prepare the data to send back as JSON response
+#     response_data = {
+#         'status': 'success',
+#         'title': task.title,
+#         'completed': task.completed,
+#         'incomplete_tasks_count': incomplete_tasks_count  # Pass the number of incomplete tasks
+#     }
+    
+#     # Return JSON response with the updated data
+#     return JsonResponse(response_data)
+
+from django.http import JsonResponse
+
 def complete_task(request, task_id):
-   
     task = get_object_or_404(TodoTask, pk=task_id)
     task.completed = not task.completed
     task.save()
-    response_data = {'status': 'success', 'title': task.title, 'completed': task.completed} 
-    return HttpResponse(content_type='application/json', content=response_data)
+
+    response_data = {
+        'status': 'success',
+        'completed': task.completed,
+    }
+    return JsonResponse(response_data)
+
+
+from django.shortcuts import render
+from .models import TodoTask
+
+def incomplete_tasks_view(request):
+    all_tasks = TodoTask.objects.all()
+
+    completed_tasks_count = TodoTask.objects.filter(completed=True).count()
+    
+    incomplete_tasks_count = all_tasks.count() - completed_tasks_count
+    
+    incomplete_tasks = all_tasks.filter(completed=False)
+    
+    return render(request, 'todoapp/todolist.html', {
+        'incomplete_tasks': incomplete_tasks,
+        'incomplete_tasks_count': incomplete_tasks_count
+    })

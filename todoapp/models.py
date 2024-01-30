@@ -16,17 +16,29 @@ class UserSignIn(models.Model):
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=255)
 
-from django.db import models
-from django.contrib.auth.models import User
+# class UserProfile(models.Model):
+#     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+#     name = models.CharField(max_length=255)
+#     email = models.EmailField()
+#     phone_number = models.CharField(max_length=15)
+#     age = models.PositiveIntegerField()
+
+#     def __str__(self):
+#         return self.user.username
+    
+# models.py
+
+
 class UserProfile(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=128, )  
     phone_number = models.CharField(max_length=15)
     age = models.PositiveIntegerField()
 
     def __str__(self):
-        return self.user.username
+        return self.name
+
 
 class TodoTask(models.Model):
     title = models.CharField(max_length=200)

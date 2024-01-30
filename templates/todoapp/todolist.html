@@ -13,6 +13,11 @@
             background-color: #f8f9fa;
         }
 
+        .c2 {
+            text-align: right;
+            margin-bottom: 20px; 
+        }
+
         h1 {
             color: #007bff;
             text-align: center;
@@ -84,39 +89,82 @@
     </style>
 </head>
 <body>
-    <h1>Todo List</h1>
+    <h1>Todo List</h1> 
 
+    <div class ="c2">
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Logout</button>
+        </form>
+    </div>
+    
+
+
+    <p>You have {{ incomplete_tasks_count }} incomplete tasks.</p>
+
+    <ul>
+        {% for task in incomplete_tasks %}
+            <li>{{ task.title }}</li>
+        {% endfor %}
+    </ul>
+
+   
     {% for task in tasks %}
-        <div class="task-container">
-            <div class="task-title">{{ task.title }}</div>
-            <div class="task-description">{{ task.description }}</div>
-            <div class="task-time">Finish Time: {{ task.finish_time }}</div>
+    <div class="task-container">
+        <div class="task-title">{{ task.title }}</div>
+        <div class="task-description">{{ task.description }}</div>
+        <div class="task-time">Finish Time: {{ task.finish_time }}</div>
 
-            {% if task.time_left.days >= 0 %}
-                <div class="task-time">Time Left: {{ task.time_left }}</div>
-            {% else %}
-                <div class="expired-task">Task Expired</div>
-            {% endif %}
+        {% if task.time_left.days >= 0 %}
+            <div id="countdown_{{ task.id }}"></div>
+            <script>
+                // Set the target date from the finish_time input
+                var targetDate_{{ task.id }} = new Date('{{ task.finish_time|date:"Y-m-d\TH:i:s" }}').getTime();
 
-            <div class="task-actions">
-                <a href="{% url 'edittask' task.id %}" class="btn btn-secondary">Edit</a>
-                <a href="{% url 'deletetask' task.id %}" class="btn btn-danger">Delete</a>
-                <br>   
-                <!-- Add the following line for the complete_task view -->
-                <input type="checkbox" id="completeTask{{ task.id }}" onchange="completeTask('{{ task.id }}')" class="form-check-input">
-                <label for="completeTask{{ task.id }}" class="btn btn-info">Complete</label>
-            </div>
+                // Update the countdown every 1 second
+                var countdownInterval_{{ task.id }} = setInterval(function() {
+                    var currentDate = new Date().getTime();
+                    var timeDifference = targetDate_{{ task.id }} - currentDate;
+
+                    // Calculate days, hours, minutes, and seconds
+                    var days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+                    var hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    var minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+                    var seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+                    // Display the countdown in the corresponding div
+                    document.getElementById("countdown_{{ task.id }}").innerHTML = "Time Left: " + days + "d " + hours + "h " + minutes + "m " + seconds + "s ";
+
+                    // If the countdown is over, display a message
+                    if (timeDifference < 0) {
+                        clearInterval(countdownInterval_{{ task.id }});
+                        document.getElementById("countdown_{{ task.id }}").innerHTML = "EXPIRED";
+                    }
+                }, 1000);
+            </script>
+        {% else %}
+            <div class="expired-task">Task Expired</div>
+        {% endif %}
+
+        <div class="task-actions">
+            <a href="{% url 'edittask' task.id %}" class="btn btn-secondary">Edit</a>
+            <a href="{% url 'deletetask' task.id %}" class="btn btn-danger">Delete</a>
+            <br>   
+            <!-- Add the following line for the complete_task view -->
+            <input type="checkbox" id="completeTask{{ task.id }}" onchange="completeTask('{{ task.id }}')" class="form-check-input">
+            <label for="completeTask{{ task.id }}" class="btn btn-info">Complete</label>
         </div>
-    {% endfor %}
+    </div>
+{% endfor %}
+
 
     <a href="{% url 'addtask' %}" class="btn btn-success add-button">Add Task</a>
 
-    <!-- Bootstrap JS and Popper.js scripts (optional, but required for some Bootstrap features) -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
-    <!-- Add a script to handle the AJAX request for completing a task -->
+    
     <script>
         function completeTask(taskId) {
             // Send an AJAX request to the complete_task view
