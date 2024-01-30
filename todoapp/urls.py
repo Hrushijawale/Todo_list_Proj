@@ -4,10 +4,10 @@ from . import views
 from .views import TodoListView, AddTaskView, EditTaskView, DeleteTaskView, complete_task, incomplete_tasks_view, logout_view
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('/index', views.index, name='index'),
     path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
-    path('home/', views.home, name='home'),
+    path('', views.home_view, name='home'),
     path('todolist/', TodoListView.as_view(), name='todolist'),
     path('addtask/', AddTaskView.as_view(), name='addtask'),
     path('edittask/<int:task_id>/', EditTaskView.as_view(), name='edittask'),

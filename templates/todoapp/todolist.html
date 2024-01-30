@@ -97,7 +97,9 @@
             <button type="submit" class="btn btn-danger">Logout</button>
         </form>
     </div>
-    
+    <div class="home-button">
+        <a href="{% url 'home' %}" class="btn btn-primary">Home</a>
+    </div>
 
 
     <p>You have {{ incomplete_tasks_count }} incomplete tasks.</p>
@@ -114,7 +116,7 @@
         <div class="task-title">{{ task.title }}</div>
         <div class="task-description">{{ task.description }}</div>
         <div class="task-time">Finish Time: {{ task.finish_time }}</div>
-
+       
         {% if task.time_left.days >= 0 %}
             <div id="countdown_{{ task.id }}"></div>
             <script>
@@ -154,6 +156,7 @@
             <input type="checkbox" id="completeTask{{ task.id }}" onchange="completeTask('{{ task.id }}')" class="form-check-input">
             <label for="completeTask{{ task.id }}" class="btn btn-info">Complete</label>
         </div>
+        
     </div>
 {% endfor %}
 

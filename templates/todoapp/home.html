@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo App</title>
+    <title>Task Manager</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,37 +13,64 @@
             padding: 20px;
         }
 
-        h1 {
-            color: #333;
+        .task-container {
+            margin-bottom: 10px;
         }
 
-        p {
-            color: #777;
-        }
-
-        .add-button {
+        .task-title {
             display: inline-block;
-            padding: 15px;
-            font-size: 24px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            margin-top: 20px;
+            margin-right: 10px;
+        }
+
+        .complete-button, .delete-button {
+            cursor: pointer;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        .complete-button:hover, .delete-button:hover {
+            opacity: 0.8;
+        }
+
+        .completed {
+            text-decoration: line-through;
         }
     </style>
 </head>
 <body>
-    <h1>Todo App</h1>
-    
-    {% if user.is_authenticated %}
-        <p>Hello {{ user.username }},</p>
-    {% else %}
-        <p>Hello Guest,</p>
-    {% endif %}
+    <div class="container">
+        <h1 class="mt-5">Task Manager</h1>
 
-    <p>Today is {{ current_date }}</p>
+        <h2 class="mt-4">Tasks</h2>
 
-    <a href="{% url 'todolist' %}" class="add-button">+</a>
+        <!-- Task List -->
+        {% for task in tasks %}
+        <div class="task-container">
+            <div class="task-title{% if task.completed %} completed{% endif %}">
+                {{ task.title }}
+            </div>
+            <form action="{% url 'home' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <input type="hidden" name="action" value="complete">
+                <button type="submit" class="btn btn-success complete-button">Complete</button>
+            </form>
+            <form action="{% url 'home' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <input type="hidden" name="task_id" value="{{ task.id }}">
+                <input type="hidden" name="action" value="delete">
+                <button type="submit" class="btn btn-danger delete-button">Delete</button>
+            </form>
+        </div>
+        {% endfor %}
+
+        <!-- Add Task Button -->
+        <a href="{% url 'addtask' %}" class="btn btn-primary mt-4">Add Task</a>
+    </div>
+
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

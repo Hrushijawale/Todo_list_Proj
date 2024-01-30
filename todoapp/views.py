@@ -33,8 +33,42 @@ from .models import TodoTask
 def index(request):
     return HttpResponse("This is from index")
 
-def home(request):
-    return render(request, 'todoapp/home.html')
+from django.shortcuts import render
+from .models import Task 
+
+from django.shortcuts import render, redirect
+from .models import Task
+
+def home_view(request):
+    if request.method == 'POST':
+        task_id = request.POST.get('task_id')
+        action = request.POST.get('action')
+
+        if action == 'complete':
+            # Get the task object
+            task = TodoTask.objects.get(pk=task_id)
+            # Toggle the completed status
+            task.completed = not task.completed
+            task.save()
+
+            # Redirect back to the home page
+            return redirect('home')
+        elif action == 'delete':
+            # Get the task object and delete it
+            TodoTask.objects.filter(pk=task_id).delete()
+
+            # Redirect back to the home page
+            return redirect('home')
+
+    # Fetch all tasks from the database
+    tasks = TodoTask.objects.all()
+
+    context = {
+        'tasks': tasks,
+    }
+
+    return render(request, 'todoapp/home.html', context)
+
 
 def todo_list(request):
     return render(request, 'todoapp/todolist.html')
@@ -168,42 +202,12 @@ class DeleteTaskView(View):
 
         return redirect('todolist')
     
-   
-# from django.shortcuts import render, get_object_or_404
-# from django.http import JsonResponse
-# from django.http import HttpResponse
-# from .models import TodoTask
-
-# def complete_task(request, task_id):
-   
-#     task = get_object_or_404(TodoTask, pk=task_id)
-#     task.completed = not task.completed
-#     task.save()
-#     response_data = {'status': 'success', 'title': task.title, 'completed': task.completed} 
-#     return HttpResponse(content_type='application/json', content=response_data)
+ 
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from .models import TodoTask
 
-# def complete_task(request, task_id):
-#     task = get_object_or_404(TodoTask, pk=task_id)
-#     task.completed = not task.completed
-#     task.save()
-
-#     # Calculate the number of incomplete tasks
-#     incomplete_tasks_count = TodoTask.objects.filter(completed=False).count()
-
-#     # Prepare the data to send back as JSON response
-#     response_data = {
-#         'status': 'success',
-#         'title': task.title,
-#         'completed': task.completed,
-#         'incomplete_tasks_count': incomplete_tasks_count  # Pass the number of incomplete tasks
-#     }
-    
-#     # Return JSON response with the updated data
-#     return JsonResponse(response_data)
 
 from django.http import JsonResponse
 
@@ -217,6 +221,24 @@ def complete_task(request, task_id):
         'completed': task.completed,
     }
     return JsonResponse(response_data)
+
+from django.http import JsonResponse
+
+def complete_task(request):
+    if request.method == 'POST' and request.is_ajax():
+        task_id = request.POST.get('task_id')
+        # Perform database operations to mark task as completed
+        # Return JSON response indicating success or failure
+        return JsonResponse({'success': True})
+
+def delete_task(request):
+    if request.method == 'POST' and request.is_ajax():
+        task_id = request.POST.get('task_id')
+        # Perform database operations to delete the task
+        # Return JSON response indicating success or failure
+        return JsonResponse({'success': True})
+
+
 
 
 from django.shortcuts import render
