@@ -11,7 +11,6 @@ from . import models
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
-# User = settings.AUTH_USER_MODEL
 from .models import UserSignIn
 from django.views import View
 from .models import TodoTask
@@ -19,13 +18,8 @@ from django.core.mail import send_mail
 from django.contrib import messages
 from .models import TodoTask, UserProfile
 from .models import *
-# from django.conf import settings
-# User = settings.AUTH_USER_MODEL
 from django.contrib.auth import get_user_model
 User = get_user_model()
-# from django.contrib.auth.models import User
-
-# from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from .models import UserProfile
 from django.conf import settings
@@ -47,14 +41,12 @@ def login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Check if login credentials exist in the UserSignIn model
         try:
             user_signin = UserSignIn.objects.get(username=username, password=password)
         except UserSignIn.DoesNotExist:
             messages.warning(request, 'Account not found. Please sign up.')
             return redirect('home') 
 
-        # Authenticate user against the custom User model
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
@@ -75,10 +67,10 @@ def signup(request):
         phone_number = request.POST.get('phone_number')
         age = request.POST.get('age')
 
-        # Create a new user
+       
         user = User.objects.create_user(username=email, email=email, password=password)
 
-        # Create a user profile with the additional fields
+      
         user_profile = UserProfile.objects.create(
             user=user,
             name=name,
@@ -94,7 +86,7 @@ def signup(request):
     return render(request, 'todoapp/signup.html')
 
 
-# @login_required
+
 class TodoListView(View):
     template_name = 'todoapp/todolist.html'
 
@@ -139,12 +131,7 @@ class EditTaskView(View):
         messages.success(request, 'Task updated successfully.')
         return redirect('todolist')
 
-# views.py
 
-# from django.shortcuts import render, redirect
-# from django.views import View
-# from django.contrib import messages
-# from .models import TodoTask
 
 class DeleteTaskView(View):
     template_name = 'todoapp/deletetask.html'
@@ -160,31 +147,20 @@ class DeleteTaskView(View):
             task = TodoTask.objects.get(id=task_id)
             task.delete()
             messages.success(request, 'Task deleted successfully.')
-        # If 'Cancel' or an unknown action, do nothing
+    
 
         return redirect('todolist')
     
-    # views.py
+   
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
 from django.http import HttpResponse
 from .models import TodoTask
 
 def complete_task(request, task_id):
-    # Get the task object from the database
+   
     task = get_object_or_404(TodoTask, pk=task_id)
-
-    # Toggle the 'completed' status
     task.completed = not task.completed
-
-    # Save the updated task
     task.save()
-
-    # Return a JSON response indicating success
-    response_data = {'status': 'success', 'title': task.title, 'completed': task.completed}
-    
-    # If you prefer to use JsonResponse
-    # return JsonResponse(response_data)
-
-    # If you prefer to use HttpResponse
+    response_data = {'status': 'success', 'title': task.title, 'completed': task.completed} 
     return HttpResponse(content_type='application/json', content=response_data)
