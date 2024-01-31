@@ -101,15 +101,6 @@
         <a href="{% url 'home' %}" class="btn btn-primary">Home</a>
     </div>
 
-
-    <p>You have {{ incomplete_tasks_count }} incomplete tasks.</p>
-
-    <ul>
-        {% for task in incomplete_tasks %}
-            <li>{{ task.title }}</li>
-        {% endfor %}
-    </ul>
-
    
     {% for task in tasks %}
     <div class="task-container">
@@ -151,10 +142,7 @@
         <div class="task-actions">
             <a href="{% url 'edittask' task.id %}" class="btn btn-secondary">Edit</a>
             <a href="{% url 'deletetask' task.id %}" class="btn btn-danger">Delete</a>
-            <br>   
-            <!-- Add the following line for the complete_task view -->
-            <input type="checkbox" id="completeTask{{ task.id }}" onchange="completeTask('{{ task.id }}')" class="form-check-input">
-            <label for="completeTask{{ task.id }}" class="btn btn-info">Complete</label>
+
         </div>
         
     </div>

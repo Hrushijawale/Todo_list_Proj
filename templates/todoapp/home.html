@@ -6,6 +6,8 @@
     <title>Task Manager</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,9 +19,11 @@
             margin-bottom: 10px;
         }
 
+        .task-table {
+            width: 100%;
+        }
+
         .task-title {
-            display: inline-block;
-            margin-right: 10px;
             cursor: pointer; /* Add cursor pointer for indicating clickability */
         }
 
@@ -36,6 +40,10 @@
         .completed {
             text-decoration: line-through;
         }
+
+        .completed-tasks {
+            display: none; /* Hide completed tasks table by default */
+        }
     </style>
 </head>
 <body>
@@ -45,25 +53,56 @@
         <h2 class="mt-4">Tasks</h2>
         <p>You have {{ incomplete_tasks_count }} incomplete tasks.</p>
         <!-- Task List -->
-        {% for task in tasks %}
-        <div class="task-container">
-            <a href="{% url 'todolist' %}" class="task-title{% if task.completed %} completed{% endif %}">
-                {{ task.title }}
-            </a>
-            <form action="{% url 'home' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="task_id" value="{{ task.id }}">
-                <input type="hidden" name="action" value="complete">
-                <button type="submit" class="btn btn-success complete-button">Complete</button>
-            </form>
-            <form action="{% url 'home' %}" method="post" style="display: inline;">
-                {% csrf_token %}
-                <input type="hidden" name="task_id" value="{{ task.id }}">
-                <input type="hidden" name="action" value="delete">
-                <button type="submit" class="btn btn-danger delete-button">Delete</button>
-            </form>
+        <table class="table task-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr class="task-container">
+                    <td>
+                        <h4>
+                            <a href="{% url 'todolist' %}" class="task-title{% if task.completed %} completed{% endif %}">
+                                {{ task.title }}
+                            </a>
+                        </h4>
+                    </td>
+                    <td>
+                        <form action="{% url 'home' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <input type="hidden" name="action" value="complete">
+                            <button type="submit" class="btn btn-success complete-button"><i class="material-icons">done</i></button>
+                        </form>
+                        <form action="{% url 'home' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <input type="hidden" name="action" value="delete">
+                            <button type="submit" class="btn btn-danger delete-button"><i class="material-icons">delete</i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Completed Tasks -->
+        <div class="completed-tasks">
+            <h2 class="mt-4">Completed Tasks</h2>
+            <table class="table task-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                    </tr>
+                </thead>
+                <tbody id="completed-tasks-list">
+                    <!-- Completed tasks will be dynamically added here -->
+                </tbody>
+            </table>
         </div>
-        {% endfor %}
 
         <!-- Pagination Links -->
         <div class="mt-4">
@@ -88,5 +127,24 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Move completed task to completed tasks section
+        $(document).ready(function() {
+            $('.complete-button').click(function() {
+                // Get the parent task container
+                var taskContainer = $(this).closest('.task-container');
+                
+                // Remove the task from the task list
+                taskContainer.remove();
+
+                // Clone the task and append to the completed tasks list
+                var completedTask = taskContainer.clone();
+                completedTask.appendTo('#completed-tasks-list');
+
+                // Show the completed tasks section if it was hidden
+                $('.completed-tasks').show();
+            });
+        });
+    </script>
 </body>
 </html>

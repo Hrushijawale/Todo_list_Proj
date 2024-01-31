@@ -34,25 +34,17 @@ def index(request):
     return HttpResponse("This is from index")
 
 
-
 def home_view(request):
-    # Fetch all tasks from the database
     tasks_list = TodoTask.objects.all()
-
-    # Number of tasks per page
     tasks_per_page = 6
-
     paginator = Paginator(tasks_list, tasks_per_page)
-
     page_number = request.GET.get('page')
 
     try:
         tasks = paginator.page(page_number)
     except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
         tasks = paginator.page(1)
     except EmptyPage:
-        # If page is out of range, deliver last page of results.
         tasks = paginator.page(paginator.num_pages)
 
     if request.method == 'POST':
@@ -60,29 +52,21 @@ def home_view(request):
         action = request.POST.get('action')
 
         if action == 'complete':
-            # Get the task object
             task = TodoTask.objects.get(pk=task_id)
-            # Toggle the completed status
             task.completed = not task.completed
             task.save()
-
-            # Redirect back to the home page
             return redirect('home')
+        
         elif action == 'delete':
-            # Get the task object and delete it
             TodoTask.objects.filter(pk=task_id).delete()
-
-            # Redirect back to the home page
             return redirect('home')
 
-    # Calculate the number of incomplete tasks
     incomplete_tasks_count = TodoTask.objects.filter(completed=False).count()
 
     context = {
         'tasks': tasks,
         'incomplete_tasks_count': incomplete_tasks_count,
     }
-
     return render(request, 'todoapp/home.html', context)
 
 def todo_list(request):
@@ -140,10 +124,9 @@ def signup(request):
         return render(request, 'todoapp/signup.html')
 
 
-
 def logout_view(request):
     logout(request)
-    return redirect('login')  # Redirect to the home page after logout
+    return redirect('login')
 
 
 class TodoListView(View):
@@ -223,9 +206,6 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from .models import TodoTask
 
-
-from django.http import JsonResponse
-
 def complete_task(request, task_id):
     task = get_object_or_404(TodoTask, pk=task_id)
     task.completed = not task.completed
@@ -237,40 +217,34 @@ def complete_task(request, task_id):
     }
     return JsonResponse(response_data)
 
-from django.http import JsonResponse
 
 def complete_task(request):
     if request.method == 'POST' and request.is_ajax():
         task_id = request.POST.get('task_id')
-        # Perform database operations to mark task as completed
-        # Return JSON response indicating success or failure
         return JsonResponse({'success': True})
 
 def delete_task(request):
     if request.method == 'POST' and request.is_ajax():
         task_id = request.POST.get('task_id')
-        # Perform database operations to delete the task
-        # Return JSON response indicating success or failure
         return JsonResponse({'success': True})
 
+#email notfification view
+from django.core.mail import EmailMessage, get_connection
+from django.conf import settings
 
-
-
-from django.shortcuts import render
-from .models import TodoTask
-
-def incomplete_tasks_view(request):
-    all_tasks = TodoTask.objects.all()
-
-    completed_tasks_count = TodoTask.objects.filter(completed=True).count()
-    
-    incomplete_tasks_count = all_tasks.count() - completed_tasks_count
-    
-    incomplete_tasks = all_tasks.filter(completed=False)
-    
-    return render(request, 'todoapp/todolist.html', {
-        'incomplete_tasks': incomplete_tasks,
-        'incomplete_tasks_count': incomplete_tasks_count
-    })
-
-
+def send_email(request):  
+   if request.method == "POST": 
+       with get_connection(  
+           host=settings.EMAIL_HOST, 
+            port=settings.EMAIL_PORT,  
+            username=settings.EMAIL_HOST_USER, 
+            password=settings.EMAIL_HOST_PASSWORD, 
+            use_tls=settings.EMAIL_USE_TLS  
+       ) as connection:  
+           subject = request.POST.get("subject")  
+           email_from = settings.EMAIL_HOST_USER  
+           recipient_list = [request.POST.get("email"), ]  
+           message = request.POST.get("message")  
+           EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()  
+ 
+   return render(request, 'todoapp/mail.html')

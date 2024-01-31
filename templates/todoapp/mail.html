@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Form</title>
+    <!-- Assuming you have Bootstrap CSS linked -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+    <div class="container">
+        <form id="myForm" method="post" action="javascript:void(0);">
+            <div class="mb-3">
+                <label for="exampleFormControlInput1" class="form-label">Receipt email address</label>
+                <input type="text" class="form-control" name="email" id="exampleFormControlInput1" placeholder="Receipt email address">
+            </div>
+            <div class="mb-3">
+                <label for="exampleInputSubject" class="form-label">Subject</label>
+                <input type="text" class="form-control" name="subject" id="exampleInputSubject">
+            </div>
+            <div class="mb-3">
+                <label for="exampleFormControlTextarea1" class="form-label">Message</label>
+                <textarea class="form-control" id="exampleFormControlTextarea1" name="message" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+        <div id="message" style="display: none;">Email sent successfully</div>
+    </div>
+
+    <!-- Bootstrap JS, assuming you have it linked -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+    <script>
+        document.getElementById("myForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the form from submitting
+
+            // Simulate sending email (You can replace this with your actual email sending logic)
+            // For demonstration purposes, we are just showing a message
+            document.getElementById("message").style.display = "block";
+
+            // Reset the form after a delay (You can adjust the delay as needed)
+            setTimeout(function() {
+                document.getElementById("myForm").reset();
+                document.getElementById("message").style.display = "none";
+            }, 3000); // Reset after 3 seconds (3000 milliseconds)
+        });
+    </script>
+</body>
+</html>
