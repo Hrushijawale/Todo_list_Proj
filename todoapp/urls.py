@@ -14,5 +14,5 @@ urlpatterns = [
     path('deletetask/<int:task_id>/', DeleteTaskView.as_view(), name='deletetask'),
     path('complete_task/<int:task_id>/', complete_task, name='complete_task'),
     path('logout/', logout_view, name='logout'),
-    path('mail/', views.send_email, name='mail'),
+    path('mail/', views.send_notification_email, name='mail'),
 ]

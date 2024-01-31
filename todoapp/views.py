@@ -228,23 +228,26 @@ def delete_task(request):
         task_id = request.POST.get('task_id')
         return JsonResponse({'success': True})
 
-#email notfification view
-from django.core.mail import EmailMessage, get_connection
-from django.conf import settings
+from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.http import JsonResponse
+from django.utils import timezone
+from .models import TodoTask
 
-def send_email(request):  
-   if request.method == "POST": 
-       with get_connection(  
-           host=settings.EMAIL_HOST, 
-            port=settings.EMAIL_PORT,  
-            username=settings.EMAIL_HOST_USER, 
-            password=settings.EMAIL_HOST_PASSWORD, 
-            use_tls=settings.EMAIL_USE_TLS  
-       ) as connection:  
-           subject = request.POST.get("subject")  
-           email_from = settings.EMAIL_HOST_USER  
-           recipient_list = [request.POST.get("email"), ]  
-           message = request.POST.get("message")  
-           EmailMessage(subject, message, email_from, recipient_list, connection=connection).send()  
- 
-   return render(request, 'todoapp/mail.html')
+def send_notification_email(request, task_id=1):
+    todo = get_object_or_404(UserProfile, pk=task_id)
+    user_email = todo.email
+    subject = "Todo Notification"
+    message = f'Hello Dear,\n\nYour todo Task has reached its notification time.\n\n'
+    from_email = "hrushikesh.jawale@indiabonds.com" 
+    recipient_list = [user_email]
+
+    try:
+        send_mail(subject, message, from_email, recipient_list)
+        messages.success(request, 'Email sent successfully')
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        print("error:", e)
+        messages.error(request, f'Error: {str(e)}')
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)

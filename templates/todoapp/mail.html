@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -45,5 +45,16 @@
             }, 3000); // Reset after 3 seconds (3000 milliseconds)
         });
     </script>
+</body>
+</html> {% endcomment %}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Reminder</title>
+</head>
+<body>
+    <h1>Task Reminder</h1>
+    <p>Your task "{{ task.title }}" is about to finish in 5 minutes.</p>
 </body>
 </html>
