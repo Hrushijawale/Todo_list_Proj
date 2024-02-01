@@ -41,8 +41,8 @@
             text-decoration: line-through;
         }
 
-        .completed-tasks {
-            display: none; /* Hide completed tasks table by default */
+        .incomplete {
+            background-color: #dc3545; /* Red color for incomplete tasks */
         }
     </style>
 </head>
@@ -75,34 +75,19 @@
                             {% csrf_token %}
                             <input type="hidden" name="task_id" value="{{ task.id }}">
                             <input type="hidden" name="action" value="complete">
-                            <button type="submit" class="btn btn-success complete-button"><i class="material-icons">done</i></button>
+                            <button type="submit" class="btn btn-success complete-button"><i class="material-icons">done</i> Complete</button>
                         </form>
                         <form action="{% url 'home' %}" method="post" style="display: inline;">
                             {% csrf_token %}
                             <input type="hidden" name="task_id" value="{{ task.id }}">
                             <input type="hidden" name="action" value="delete">
-                            <button type="submit" class="btn btn-danger delete-button"><i class="material-icons">delete</i></button>
+                            <button type="submit" class="btn btn-danger delete-button"><i class="material-icons">delete</i> Delete</button>
                         </form>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Completed Tasks -->
-        <div class="completed-tasks">
-            <h2 class="mt-4">Completed Tasks</h2>
-            <table class="table task-table">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                    </tr>
-                </thead>
-                <tbody id="completed-tasks-list">
-                    <!-- Completed tasks will be dynamically added here -->
-                </tbody>
-            </table>
-        </div>
 
         <!-- Pagination Links -->
         <div class="mt-4">
@@ -128,23 +113,32 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        // Move completed task to completed tasks section
-        $(document).ready(function() {
-            $('.complete-button').click(function() {
-                // Get the parent task container
-                var taskContainer = $(this).closest('.task-container');
-                
-                // Remove the task from the task list
-                taskContainer.remove();
+    // Apply strikethrough to task title and update incomplete task count
+    $(document).ready(function() {
+        $('.complete-button').click(function() {
+            // Get the parent task container
+            var taskContainer = $(this).closest('.task-container');
+            
+            // Get the task title element
+            var taskTitle = taskContainer.find('.task-title');
 
-                // Clone the task and append to the completed tasks list
-                var completedTask = taskContainer.clone();
-                completedTask.appendTo('#completed-tasks-list');
+            // Toggle between complete and incomplete states
+            if (taskTitle.hasClass('completed')) {
+                taskTitle.removeClass('completed');
+                $(this).removeClass('btn-danger').addClass('btn-success').html('<i class="material-icons">done</i> Complete');
+            } else {
+                taskTitle.addClass('completed');
+                $(this).removeClass('btn-success').addClass('btn-danger').html('<i class="material-icons">clear</i> Incomplete');
+            }
 
-                // Show the completed tasks section if it was hidden
-                $('.completed-tasks').show();
-            });
+            // Update the incomplete tasks count
+            var incompleteTasksCount = parseInt($('p.tasks-count').text());
+            $('p.tasks-count').text(incompleteTasksCount - 1);
+
+            // You can add AJAX here to send the completion status to the server if needed
         });
+    });
     </script>
+
 </body>
 </html>
